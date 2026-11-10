@@ -1,0 +1,71 @@
+SCADENZE FISCALI AI
+===================
+
+Link per aprirla sul web:
+https://andreapollastrelli95.github.io/scadenze-fiscali-ai/
+
+
+COSA FA
+-------
+- Assistente: carichi PDF, foto, Word, Excel, email, audio o scrivi testo libero.
+  Gemini legge e propone di archiviare, rispondere o programmare la scadenza.
+  Confermi tu con un clic prima che venga salvato qualcosa.
+- Scadenzario: elenco e vista mese, stati (da fare, scaduta, fatta), promemoria.
+- Elenco scadenze fiscali: 43 regole ricorrenti per privati, forfettari,
+  P.IVA ordinarie/società, datori di lavoro e rottamazione, con la prossima data
+  calcolata (sabato e festivi spostati al primo giorno lavorativo).
+  Vista "Le mie" (voci con la stella) e vista "Tutte".
+- Clienti: per l'uso da professionista, ogni cliente ha scadenzario e archivio suoi.
+  In alto scegli l'area: Personale, un cliente, oppure Tutte le aree.
+
+
+1) APRIRE L'APP
+----------------
+L'app è pubblicata su GitHub Pages al link scritto sopra e funziona anche a PC spento.
+
+Sul Desktop: apri il link in Chrome o Edge > menu > "Installa" / "Crea scorciatoia".
+Su iPhone: apri il link in Safari > Condividi > "Aggiungi a Home".
+
+
+2) ATTIVARE L'ASSISTENTE GEMINI
+-------------------------------
+Nell'app: Impostazioni > incolla la tua chiave API Gemini > Salva > "Prova l'assistente".
+La chiave resta solo sul dispositivo: va inserita una volta sul PC e una sull'iPhone.
+Non scriverla mai dentro index.html, perché il repository è pubblico.
+
+
+3) COLLEGARE GOOGLE (Calendar + email + dati condivisi tra PC e iPhone)
+-----------------------------------------------------------------------
+1. Vai su https://script.google.com > Nuovo progetto.
+2. Cancella tutto e incolla il contenuto del file Code.gs.
+3. In alto nel codice cambia la parola segreta (SEGRETO) con una tua, lunga.
+4. Scegli la funzione "installa" > Esegui > autorizza con il tuo account Google.
+5. Distribuisci > Nuova distribuzione > tipo "App web"
+   - Esegui come: Me
+   - Chi ha accesso: Chiunque
+   Copia l'indirizzo che termina con /exec.
+6. Nell'app: Impostazioni > Collegamento Google > incolla indirizzo e parola
+   segreta > "Salva e prova il collegamento". Ripeti sull'iPhone.
+
+Da quel momento:
+- ogni scadenza confermata diventa un evento su Google Calendar con gli avvisi
+  scelti (30, 15, 7, 3, 1 giorni prima, alle 9:00);
+- ogni mattina alle 7 ricevi un'email con le scadenze di oggi, quelle con un
+  promemoria che cade oggi e, il lunedì, quelle scadute;
+- dati e documenti stanno nella cartella "Scadenze Fiscali AI" del tuo Drive
+  e si sincronizzano tra i dispositivi. Funziona anche a PC spento.
+
+Senza il collegamento Google l'app funziona lo stesso, ma i dati restano sul
+singolo dispositivo e per il calendario usi "Aggiungi a Google Calendar" o
+"Esporta calendario (.ics)".
+
+Nota: chi conosce indirizzo e parola segreta può leggere i dati. Non condividerli.
+
+
+AVVERTENZE
+----------
+- L'elenco è stato verificato a novembre 2026. Proroghe, TARI (decisa dal Comune)
+  e bollo auto (Regione) cambiano: controlla sempre le comunicazioni ufficiali.
+- L'assistente può sbagliare a leggere un documento: verifica data e importo
+  nella scheda di conferma.
+- L'app è un aiuto organizzativo e non sostituisce il commercialista.

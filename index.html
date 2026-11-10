@@ -1,0 +1,799 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Scadenze Fiscali AI</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Scadenze AI">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#0f5c55">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --bg:#f3efe6; --card:#fffdf8; --ink:#1c2a29; --muted:#64716e; --line:#dcd4c4;
+  --pri:#0f5c55; --pri-ink:#ffffff; --soft:#e2eee9;
+  --warn:#a8690d; --warn-bg:#fbefd6; --bad:#ad3329; --bad-bg:#f9e1dd; --ok:#2c7a4b; --ok-bg:#def0e3;
+  --shadow:0 1px 2px rgba(28,42,41,.06),0 6px 18px rgba(28,42,41,.06);
+  --serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#131918; --card:#1b2322; --ink:#e7ece9; --muted:#97a5a1; --line:#2d3937;
+  --pri:#56b8aa; --pri-ink:#0b1413; --soft:#1f302d;
+  --warn:#e2ad55; --warn-bg:#3a2e17; --bad:#ee8378; --bad-bg:#3d201d; --ok:#74c492; --ok-bg:#1c3325;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25);
+}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans);padding-bottom:env(safe-area-inset-bottom)}
+h1,h2,h3{font-family:var(--serif);font-weight:600;line-height:1.2;margin:0}
+h2{font-size:1.45rem} h3{font-size:1.1rem}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--pri)}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+header.top{background:var(--pri);color:var(--pri-ink);padding:calc(10px + env(safe-area-inset-top)) 0 0}
+.brand{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-bottom:10px}
+.brand h1{font-size:1.25rem;letter-spacing:.2px;flex:1;min-width:180px}
+.brand h1 small{display:block;font:500 .72rem var(--sans);opacity:.8;letter-spacing:.08em;text-transform:uppercase}
+.ws{display:flex;align-items:center;gap:8px;font-size:.85rem}
+.ws select{background:rgba(255,255,255,.14);color:inherit;border:1px solid rgba(255,255,255,.35);border-radius:8px;padding:7px 10px;max-width:220px}
+.ws select option{color:#1c2a29}
+.sync{font-size:.75rem;opacity:.85;white-space:nowrap}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+nav.tabs button{background:none;border:0;color:inherit;opacity:.75;padding:10px 14px;border-radius:10px 10px 0 0;white-space:nowrap;cursor:pointer;font-weight:600;font-size:.93rem}
+nav.tabs button[aria-selected=true]{background:var(--bg);color:var(--ink);opacity:1}
+main{padding:22px 0 60px}
+section.view{display:none} section.view.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px}
+.lead{color:var(--muted);margin:6px 0 16px;max-width:68ch}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{background:var(--pri);color:var(--pri-ink);border:0;border-radius:10px;padding:10px 16px;font-weight:600;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--pri);border:1px solid var(--line)}
+.btn.sm{padding:6px 10px;font-size:.85rem;border-radius:8px}
+.btn.danger{background:transparent;color:var(--bad);border:1px solid var(--line)}
+.btn:disabled{opacity:.5;cursor:default}
+:focus-visible{outline:3px solid var(--warn);outline-offset:2px}
+input[type=text],input[type=date],input[type=number],input[type=password],input[type=email],input[type=search],select,textarea{
+  width:100%;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+textarea{resize:vertical;min-height:84px}
+label.f{display:block;font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:10px}
+label.f>span{display:block;margin-bottom:4px}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--soft);border-radius:999px;padding:4px 11px;font-size:.82rem;border:1px solid transparent}
+button.chip{cursor:pointer;color:inherit}
+button.chip[aria-pressed=true]{background:var(--pri);color:var(--pri-ink)}
+.chip .x{cursor:pointer;border:0;background:none;color:inherit;padding:0 2px;font-size:1rem;line-height:1}
+.muted{color:var(--muted)} .small{font-size:.85rem}
+.tag{font-size:.72rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:2px 7px;background:var(--soft)}
+.tag.bad{background:var(--bad-bg);color:var(--bad)} .tag.warn{background:var(--warn-bg);color:var(--warn)} .tag.ok{background:var(--ok-bg);color:var(--ok)}
+
+/* assistente */
+.drop{border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--muted);cursor:pointer;background:var(--bg)}
+.drop.over{border-color:var(--pri);background:var(--soft);color:var(--ink)}
+.drop strong{color:var(--ink)}
+#files{margin:10px 0;display:flex;gap:6px;flex-wrap:wrap}
+.thread{margin-top:20px;display:flex;flex-direction:column;gap:14px}
+.msg{border-radius:14px;padding:12px 15px;max-width:780px}
+.msg.user{background:var(--soft);align-self:flex-end}
+.msg.ai{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);width:100%}
+.msg p{margin:0 0 8px;white-space:pre-wrap} .msg p:last-child{margin:0}
+.act{border:1px solid var(--line);border-left:5px solid var(--pri);border-radius:10px;padding:14px;margin-top:12px;background:var(--bg)}
+.act.done{border-left-color:var(--ok);opacity:.85} .act.no{border-left-color:var(--line);opacity:.6}
+.act h4{margin:0 0 10px;font:600 .8rem var(--sans);letter-spacing:.07em;text-transform:uppercase;color:var(--pri)}
+.rem{display:flex;gap:6px;flex-wrap:wrap}
+.rem label{font-size:.82rem;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer}
+.rem input{margin-right:4px}
+
+/* scadenzario */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.stat b{display:block;font:600 1.6rem var(--serif);font-variant-numeric:tabular-nums}
+.stat span{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.stat.bad b{color:var(--bad)} .stat.warn b{color:var(--warn)}
+.month{font:600 .8rem var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px}
+.dl{display:flex;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.stub{flex:0 0 66px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--soft);border-right:2px dashed var(--line);padding:8px 0}
+.stub b{font:600 1.6rem/1 var(--serif);font-variant-numeric:tabular-nums}
+.stub i{font-style:normal;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em}
+.dl.bad .stub{background:var(--bad-bg);color:var(--bad)} .dl.warn .stub{background:var(--warn-bg);color:var(--warn)} .dl.ok .stub{background:var(--ok-bg);color:var(--ok)}
+.dl .body{flex:1;padding:10px 12px 10px 0;min-width:0}
+.dl .t{font-weight:600} .dl.ok .t{text-decoration:line-through;opacity:.7}
+.dl .meta{font-size:.84rem;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:2px}
+.dl .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:12px 0}
+.cal div{min-height:52px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:4px 6px;font-size:.8rem}
+.cal .h{min-height:0;background:none;border:0;text-align:center;color:var(--muted);font-weight:600}
+.cal .o{opacity:.35} .cal .td{outline:2px solid var(--pri)}
+.cal .n{display:block;margin-top:2px;font-weight:700;border-radius:5px;padding:0 4px;background:var(--soft);cursor:pointer}
+.cal .n.bad{background:var(--bad-bg);color:var(--bad)} .cal .n.warn{background:var(--warn-bg);color:var(--warn)}
+
+/* elenco */
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th{text-align:left;font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:8px;border-bottom:2px solid var(--line)}
+td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+td .n{font-weight:600}
+.star{background:none;border:0;font-size:1.3rem;cursor:pointer;color:var(--line);padding:0 4px;line-height:1}
+.star[aria-pressed=true]{color:var(--warn)}
+.grp td{background:var(--soft);font:600 .95rem var(--serif);padding:8px}
+.next{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+@media (max-width:720px){
+  table,tbody,tr,td{display:block} thead{display:none}
+  tr{border-bottom:1px solid var(--line);padding:10px 0} td{border:0;padding:2px 0}
+  tr.grp{padding:0;border:0} .grp td{padding:8px;margin-top:10px;border-radius:8px}
+  td[data-l]:before{content:attr(data-l) ": ";font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);padding:20px;width:min(640px,94vw);box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+.note{background:var(--warn-bg);color:var(--ink);border-radius:10px;padding:10px 14px;font-size:.88rem;margin:14px 0}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;z-index:9}
+#toast.on{opacity:1}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--pri);border-radius:50%;animation:sp 1s linear infinite;vertical-align:-3px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">
+      <h1>Scadenze Fiscali AI<small>Scadenzario con assistente Gemini</small></h1>
+      <div class="ws"><label for="ws">Area</label><select id="ws" aria-label="Area di lavoro"></select></div>
+      <span class="sync" id="sync"></span>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button role="tab" data-v="assistente">Assistente</button>
+      <button role="tab" data-v="scadenzario">Scadenzario</button>
+      <button role="tab" data-v="elenco">Elenco scadenze fiscali</button>
+      <button role="tab" data-v="archivio">Archivio</button>
+      <button role="tab" data-v="clienti">Clienti</button>
+      <button role="tab" data-v="impostazioni">Impostazioni</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<section class="view" id="v-assistente">
+  <h2>Cosa devo fare per te?</h2>
+  <p class="lead">Carica uno o più documenti, scrivi cosa vuoi ottenere o quando scade. L'assistente archivia, risponde oppure programma la scadenza con il promemoria. Prima di salvare ti chiede sempre conferma.</p>
+  <div class="card">
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Aggiungi file">
+      <strong>Trascina qui i file</strong> oppure tocca per sceglierli o scattare una foto<br>
+      <span class="small">PDF, foto, Word, Excel, CSV, fatture XML, email, audio, testo</span>
+    </div>
+    <input type="file" id="pick" multiple hidden>
+    <div id="files"></div>
+    <label class="f"><span>La tua richiesta</span>
+      <textarea id="ask" placeholder="Es. «Avviso TARI allegato: programma le rate e ricordamelo una settimana prima» oppure «Cosa devo pagare questo mese?»"></textarea></label>
+    <div class="row">
+      <button class="btn" id="send">Invia all'assistente</button>
+      <button class="chip" data-q="Leggi i documenti allegati e programma tutte le scadenze che trovi, con promemoria 7 giorni e 1 giorno prima.">Programma le scadenze</button>
+      <button class="chip" data-q="Archivia i documenti allegati con un riassunto.">Archivia</button>
+      <button class="chip" data-q="Cosa devo pagare o presentare nei prossimi 30 giorni?">Prossimi 30 giorni</button>
+    </div>
+  </div>
+  <div class="thread" id="thread" aria-live="polite"></div>
+</section>
+
+<section class="view" id="v-scadenzario">
+  <div class="row" style="justify-content:space-between">
+    <h2>Scadenzario</h2>
+    <div class="row">
+      <button class="btn" id="newdl">+ Nuova scadenza</button>
+      <button class="btn ghost" id="ics">Esporta calendario (.ics)</button>
+    </div>
+  </div>
+  <div class="stats" id="stats" style="margin-top:14px"></div>
+  <div class="row" id="dlfilters"></div>
+  <div id="dlview"></div>
+</section>
+
+<section class="view" id="v-elenco">
+  <h2>Elenco delle principali scadenze fiscali</h2>
+  <p class="lead">Regole ricorrenti per privati, partite IVA, società e datori di lavoro. La colonna «Prossima» è calcolata spostando al primo giorno lavorativo i termini che cadono di sabato o festivo. Con la stella scegli le voci che riguardano l'area attiva.</p>
+  <div class="row" id="catfilters"></div>
+  <div class="row" style="margin:12px 0">
+    <input type="search" id="catq" placeholder="Cerca (es. IMU, IVA, INPS…)" style="max-width:320px" aria-label="Cerca nell'elenco">
+    <button class="btn ghost" id="catbulk">Aggiungi allo scadenzario le voci con la stella (12 mesi)</button>
+  </div>
+  <div class="card" style="padding:6px 12px"><table id="cattable"></table></div>
+  <div class="note"><b>Verifica sempre.</b> Elenco controllato a novembre 2026. Proroghe, scadenze comunali (TARI) e regionali (bollo auto) cambiano: l'app è un aiuto e non sostituisce il commercialista o le comunicazioni ufficiali di Agenzia delle Entrate, INPS e Comune.</div>
+</section>
+
+<section class="view" id="v-archivio">
+  <h2>Archivio documenti</h2>
+  <p class="lead">Documenti archiviati dall'assistente, con riassunto. L'assistente li usa per rispondere alle tue domande.</p>
+  <div id="docs"></div>
+</section>
+
+<section class="view" id="v-clienti">
+  <h2>Clienti</h2>
+  <p class="lead">Per l'uso da professionista: ogni cliente ha il suo scadenzario, il suo archivio e le sue voci dell'elenco. Scegli l'area in alto per lavorare su un cliente; «Tutte le aree» mostra tutto insieme.</p>
+  <div class="card">
+    <div class="grid">
+      <label class="f"><span>Nome o ragione sociale</span><input type="text" id="cl-nome"></label>
+      <label class="f"><span>Tipo</span><select id="cl-tipo">
+        <option value="priv">Privato</option><option value="forf">P.IVA forfettaria</option>
+        <option value="ord">P.IVA ordinaria / società</option><option value="dat">Con dipendenti</option></select></label>
+      <label class="f"><span>Note</span><input type="text" id="cl-note"></label>
+    </div>
+    <button class="btn" id="cl-add">Aggiungi cliente</button>
+  </div>
+  <div id="cl-list" style="margin-top:14px"></div>
+</section>
+
+<section class="view" id="v-impostazioni">
+  <h2>Impostazioni</h2>
+  <div class="card" style="margin-top:14px">
+    <h3>Assistente Gemini</h3>
+    <p class="muted small">La chiave resta salvata solo su questo dispositivo, non finisce nel codice né nell'archivio Google. Va inserita una volta su ogni dispositivo.</p>
+    <div class="grid">
+      <label class="f"><span>Chiave API Gemini</span><input type="password" id="s-key" autocomplete="off" placeholder="AIza…"></label>
+      <label class="f"><span>Modello</span><select id="s-model"></select></label>
+    </div>
+    <div class="row"><button class="btn" id="s-save">Salva</button><button class="btn ghost" id="s-models">Aggiorna elenco modelli</button><button class="btn ghost" id="s-test">Prova l'assistente</button></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3>Collegamento Google (Calendar, email, archivio)</h3>
+    <p class="muted small">Facoltativo ma consigliato: crea gli eventi su Google Calendar con gli avvisi, invia l'email di promemoria ogni mattina e sincronizza i dati tra PC e iPhone. Le istruzioni sono nel file LEGGIMI.</p>
+    <div class="grid">
+      <label class="f"><span>Indirizzo dello script Google (termina con /exec)</span><input type="text" id="s-url" placeholder="https://script.google.com/macros/s/…/exec"></label>
+      <label class="f"><span>Parola segreta</span><input type="password" id="s-token" autocomplete="off"></label>
+    </div>
+    <div class="row"><button class="btn" id="s-gsave">Salva e prova il collegamento</button><button class="btn ghost" id="s-pull">Scarica i dati da Google</button></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3>Promemoria predefiniti</h3>
+    <div class="rem" id="s-rem"></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3>Copia di sicurezza</h3>
+    <div class="row"><button class="btn ghost" id="s-exp">Esporta dati (.json)</button><button class="btn ghost" id="s-imp">Importa dati</button><input type="file" id="s-impf" accept=".json" hidden></div>
+  </div>
+</section>
+
+</main>
+
+<dialog id="dlg"><form method="dialog" id="dlgform"></form></dialog>
+<div id="toast" role="status"></div>
+
+<script>
+'use strict';
+/* ============ utilità ============ */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const parseD=s=>{const [y,m,d]=String(s).split('-').map(Number);return new Date(y,m-1,d)};
+const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+const daysTo=s=>Math.round((parseD(s)-today())/864e5);
+const validD=s=>/^\d{4}-\d{2}-\d{2}$/.test(s||'')&&!isNaN(parseD(s));
+const MESI=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const MESI3=MESI.map(m=>m.slice(0,3));
+const fmtD=s=>{const d=parseD(s);return `${d.getDate()} ${MESI[d.getMonth()]} ${d.getFullYear()}`};
+const fmtE=n=>n==null||n===''||isNaN(n)?'':Number(n).toLocaleString('it-IT',{style:'currency',currency:'EUR'});
+function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),3200)}
+
+/* ============ motore date ============ */
+function easter(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return new Date(y,mo-1,da)}
+const FESTE=['1-1','1-6','4-25','5-1','6-2','8-15','10-4','11-1','12-8','12-25','12-26'];
+function isHoliday(d){if(FESTE.includes((d.getMonth()+1)+'-'+d.getDate()))return true;const e=easter(d.getFullYear());e.setDate(e.getDate()+1);return e.getMonth()===d.getMonth()&&e.getDate()===d.getDate()}
+function shiftWork(d){d=new Date(d);while(d.getDay()===0||d.getDay()===6||isHoliday(d))d.setDate(d.getDate()+1);return d}
+const mkDate=(y,m,g)=>g===-1?new Date(y,m,0):new Date(y,m-1,g);
+function occurrences(item,from,to){
+  const out=[];
+  for(let y=from.getFullYear();y<=to.getFullYear();y++){
+    let pairs=[];
+    if(item.mon!=null){for(let m=1;m<=12;m++)pairs.push([m,(item.aug&&m===8)?20:item.mon])}
+    else if(item.d)pairs=item.d;
+    for(const [m,g] of pairs){const dt=shiftWork(mkDate(y,m,g));if(dt>=from&&dt<=to)out.push(dt)}
+  }
+  return out.sort((a,b)=>a-b);
+}
+function nextOcc(item,from){from=from||today();const to=new Date(from);to.setFullYear(to.getFullYear()+2);return occurrences(item,from,to)[0]||null}
+
+/* ============ elenco scadenze fiscali ============ */
+const CATS={priv:'Privati e famiglie',forf:'Partita IVA forfettaria',ord:'Partita IVA ordinaria e società',dat:'Datori di lavoro',risc:'Cartelle e rottamazione'};
+const TIPI={V:'Versamento',D:'Dichiarazione',C:'Comunicazione'};
+const CATALOGO=[
+ {id:'p-imu',n:'IMU – acconto e saldo',c:['priv','ord'],t:'V',q:'16 giugno (acconto) e 16 dicembre (saldo)',d:[[6,16],[12,16]],chi:'Proprietari di immobili diversi dall\'abitazione principale non di lusso',note:'Il saldo si calcola con le aliquote deliberate dal Comune.',cat:'Tributi locali'},
+ {id:'p-imu-dich',n:'Dichiarazione IMU',c:['priv','ord'],t:'D',q:'30 giugno dell\'anno successivo',d:[[6,30]],chi:'Solo se nell\'anno precedente sono cambiati dati che il Comune non conosce',cat:'Tributi locali'},
+ {id:'p-tari',n:'TARI – tassa rifiuti',c:['priv','forf','ord'],t:'V',q:'Date decise dal Comune: di solito 2–4 rate tra primavera e dicembre',chi:'Chi occupa o detiene locali',note:'Guarda l\'avviso di pagamento del tuo Comune e caricalo nell\'assistente.',cat:'Tributi locali'},
+ {id:'p-bollo',n:'Bollo auto',c:['priv','forf','ord'],t:'V',q:'In genere entro l\'ultimo giorno del mese successivo alla scadenza del bollo precedente',chi:'Proprietari di veicoli',note:'Regole e scadenze dipendono dalla Regione.',cat:'Auto'},
+ {id:'p-canone',n:'Canone TV – dichiarazione di non detenzione',c:['priv'],t:'C',q:'31 gennaio',d:[[1,31]],chi:'Chi ha un\'utenza elettrica ma nessun televisore',note:'Il canone si paga in bolletta; la dichiarazione entro il 31 gennaio vale per tutto l\'anno.',cat:'Casa'},
+ {id:'p-730',n:'Modello 730',c:['priv'],t:'D',q:'30 settembre (precompilata disponibile dal 30 aprile)',d:[[9,30]],chi:'Dipendenti e pensionati',cat:'Dichiarazioni'},
+ {id:'p-redditi',n:'Modello Redditi Persone Fisiche',c:['priv','forf','ord'],t:'D',q:'31 ottobre',d:[[10,31]],chi:'Chi non può o non vuole usare il 730; titolari di partita IVA',note:'Tardiva entro 90 giorni con sanzione ridotta.',cat:'Dichiarazioni'},
+ {id:'p-saldo',n:'Saldo e primo acconto IRPEF, addizionali, cedolare secca, IVIE/IVAFE',c:['priv'],t:'V',q:'30 giugno (oppure entro 30 luglio con +0,40%)',d:[[6,30]],chi:'Chi presenta Redditi PF o 730 senza sostituto',note:'Con il 730 e un sostituto d\'imposta il conguaglio avviene in busta paga o pensione.',cat:'Imposte'},
+ {id:'p-acc2',n:'Secondo o unico acconto IRPEF e cedolare secca',c:['priv'],t:'V',q:'30 novembre',d:[[11,30]],chi:'Chi presenta Redditi PF o 730 senza sostituto',cat:'Imposte'},
+ {id:'p-colf',n:'Contributi INPS colf e badanti',c:['priv'],t:'V',q:'10 aprile, 10 luglio, 10 ottobre, 10 gennaio',d:[[1,10],[4,10],[7,10],[10,10]],chi:'Datori di lavoro domestico',cat:'Contributi'},
+ {id:'p-isee',n:'ISEE – rinnovo per Assegno unico e bonus',c:['priv'],t:'C',q:'Entro fine febbraio (l\'ISEE scade il 31 dicembre)',d:[[2,-1]],chi:'Famiglie con Assegno unico o agevolazioni legate all\'ISEE',note:'Senza ISEE aggiornato da marzo spetta l\'importo minimo; arretrati se si presenta entro il 30 giugno.',cat:'Altro'},
+ {id:'p-registro',n:'Imposta di registro sugli affitti (annualità successive)',c:['priv','ord'],t:'V',q:'Entro 30 giorni dall\'anniversario del contratto',chi:'Locatori senza cedolare secca',cat:'Casa'},
+ {id:'p-succ',n:'Dichiarazione di successione',c:['priv'],t:'D',q:'Entro 12 mesi dal decesso',chi:'Eredi',cat:'Dichiarazioni'},
+
+ {id:'r-quater',n:'Rottamazione-quater – rate',c:['risc'],t:'V',q:'28 febbraio, 31 maggio, 31 luglio, 30 novembre',d:[[2,-1],[5,31],[7,31],[11,30]],chi:'Chi ha un piano di rottamazione-quater in corso',note:'5 giorni di tolleranza. Ultima rata: 30 novembre 2027.',cat:'Imposte'},
+ {id:'r-quinq',n:'Rottamazione-quinquies – rate bimestrali',c:['risc'],t:'V',q:'Fine gennaio, marzo, maggio, luglio, settembre, novembre',d:[[1,31],[3,31],[5,31],[7,31],[9,30],[11,30]],chi:'Chi ha aderito alla rottamazione-quinquies',note:'Nessun giorno di tolleranza. Si decade dopo due rate non pagate (o l\'ultima).',cat:'Imposte'},
+
+ {id:'f-saldo',n:'Saldo e primo acconto imposta sostitutiva e contributi INPS sul reddito',c:['forf'],t:'V',q:'30 giugno (oppure entro 30 luglio con +0,40%)',d:[[6,30]],chi:'Forfettari',cat:'Imposte'},
+ {id:'f-acc2',n:'Secondo acconto imposta sostitutiva e contributi INPS',c:['forf'],t:'V',q:'30 novembre',d:[[11,30]],chi:'Forfettari',cat:'Imposte'},
+ {id:'f-inps',n:'INPS artigiani e commercianti – rate fisse sul minimale',c:['forf','ord'],t:'V',q:'16 maggio, 20 agosto, 16 novembre, 16 febbraio',d:[[2,16],[5,16],[8,20],[11,16]],chi:'Iscritti alle gestioni artigiani e commercianti',cat:'Contributi'},
+ {id:'f-rid',n:'Richiesta riduzione contributiva 35%',c:['forf'],t:'C',q:'Entro fine febbraio',d:[[2,-1]],chi:'Artigiani e commercianti forfettari che la chiedono per la prima volta',cat:'Contributi'},
+ {id:'f-bollo',n:'Imposta di bollo sulle fatture elettroniche',c:['forf','ord'],t:'V',q:'31 maggio, 30 settembre, 30 novembre, fine febbraio',d:[[5,31],[9,30],[11,30],[2,-1]],chi:'Chi emette fatture elettroniche soggette a bollo',note:'Se il bollo del 1° trimestre non supera 5.000 € si può versare con il 2°; se i primi due non lo superano, con il 3°.',cat:'Imposte'},
+
+ {id:'o-f24',n:'F24 mensile: IVA mensile, ritenute, contributi',c:['ord','dat'],t:'V',q:'Il 16 di ogni mese (20 ad agosto)',mon:16,aug:true,chi:'Contribuenti IVA mensili e sostituti d\'imposta',cat:'IVA'},
+ {id:'o-ivatrim',n:'IVA trimestrale',c:['ord'],t:'V',q:'16 maggio, 20 agosto, 16 novembre',d:[[5,16],[8,20],[11,16]],chi:'Contribuenti IVA trimestrali',note:'Con maggiorazione dell\'1%. Il 4° trimestre si versa con il saldo annuale.',cat:'IVA'},
+ {id:'o-ivasaldo',n:'Saldo IVA annuale',c:['ord'],t:'V',q:'16 marzo',d:[[3,16]],chi:'Tutti i contribuenti IVA a debito',note:'Rateizzabile, oppure differibile ai termini delle imposte sui redditi con maggiorazione.',cat:'IVA'},
+ {id:'o-acciva',n:'Acconto IVA',c:['ord'],t:'V',q:'27 dicembre',d:[[12,27]],chi:'Contribuenti IVA mensili e trimestrali',cat:'IVA'},
+ {id:'o-dichiva',n:'Dichiarazione IVA annuale',c:['ord'],t:'D',q:'Dal 1° febbraio al 30 aprile',d:[[4,30]],chi:'Tutti i soggetti IVA (esclusi forfettari)',cat:'Dichiarazioni'},
+ {id:'o-lipe',n:'LIPE – comunicazione liquidazioni periodiche IVA',c:['ord'],t:'C',q:'31 maggio, 30 settembre, 30 novembre, fine febbraio',d:[[5,31],[9,30],[11,30],[2,-1]],chi:'Soggetti IVA mensili e trimestrali',note:'Il 4° trimestre può essere comunicato con la dichiarazione IVA se inviata entro febbraio.',cat:'IVA'},
+ {id:'o-saldo',n:'Saldo e primo acconto IRPEF/IRES/IRAP, contributi e diritto camerale',c:['ord'],t:'V',q:'30 giugno (oppure entro 30 luglio con +0,40%)',d:[[6,30]],chi:'Imprese, professionisti, società',cat:'Imposte'},
+ {id:'o-acc2',n:'Secondo acconto IRPEF/IRES/IRAP e contributi',c:['ord'],t:'V',q:'30 novembre',d:[[11,30]],chi:'Imprese, professionisti, società',cat:'Imposte'},
+ {id:'o-redditi',n:'Modello Redditi SP/SC e IRAP',c:['ord'],t:'D',q:'31 ottobre',d:[[10,31]],chi:'Società di persone e di capitali (esercizio solare)',cat:'Dichiarazioni'},
+ {id:'o-cudip',n:'Certificazione Unica – dipendenti e pensionati',c:['ord','dat'],t:'C',q:'16 marzo (invio e consegna)',d:[[3,16]],chi:'Sostituti d\'imposta',cat:'Dichiarazioni'},
+ {id:'o-cuaut',n:'Certificazione Unica – lavoro autonomo',c:['ord','dat'],t:'C',q:'30 aprile',d:[[4,30]],chi:'Sostituti che hanno pagato professionisti e provvigioni',note:'Termine in vigore dal 2026.',cat:'Dichiarazioni'},
+ {id:'o-770',n:'Modello 770',c:['ord','dat'],t:'D',q:'31 ottobre',d:[[10,31]],chi:'Sostituti d\'imposta',cat:'Dichiarazioni'},
+ {id:'o-intra',n:'Elenchi Intrastat',c:['ord'],t:'C',q:'Il 25 del mese successivo al mese o trimestre',mon:25,chi:'Chi fa operazioni intracomunitarie',cat:'IVA'},
+ {id:'o-estero',n:'Fatture passive dall\'estero (ex esterometro)',c:['ord'],t:'C',q:'Entro il 15 del mese successivo',mon:15,chi:'Chi riceve fatture da fornitori esteri',cat:'IVA'},
+ {id:'o-bilancio',n:'Approvazione del bilancio',c:['ord'],t:'C',q:'30 aprile (120 giorni dalla chiusura); deposito entro 30 giorni dall\'approvazione',d:[[4,30]],chi:'Società di capitali con esercizio solare',cat:'Altro'},
+ {id:'o-libri',n:'Tassa annuale vidimazione libri sociali',c:['ord'],t:'V',q:'16 marzo',d:[[3,16]],chi:'Società di capitali',cat:'Imposte'},
+ {id:'o-cons',n:'Conservazione digitale di fatture e registri',c:['forf','ord'],t:'C',q:'Entro 3 mesi dal termine della dichiarazione dei redditi (31 gennaio)',d:[[1,31]],chi:'Chi emette o riceve fatture elettroniche',cat:'Altro'},
+ {id:'o-ts',n:'Sistema Tessera Sanitaria – invio spese sanitarie',c:['forf','ord'],t:'C',q:'31 gennaio',d:[[1,31]],chi:'Medici, farmacie e altri operatori sanitari',cat:'Dichiarazioni'},
+ {id:'o-enasarco',n:'Contributi Enasarco',c:['ord'],t:'V',q:'20 maggio, 20 agosto, 20 novembre, 20 febbraio',d:[[2,20],[5,20],[8,20],[11,20]],chi:'Aziende che si avvalgono di agenti',cat:'Contributi'},
+
+ {id:'d-uniemens',n:'UniEmens – denuncia contributiva',c:['dat'],t:'C',q:'Ultimo giorno del mese successivo',mon:-1,chi:'Datori di lavoro',cat:'Contributi'},
+ {id:'d-inail',n:'Autoliquidazione INAIL',c:['dat'],t:'V',q:'16 febbraio (denuncia salari entro fine febbraio)',d:[[2,16]],chi:'Datori di lavoro e artigiani',cat:'Contributi'},
+ {id:'d-tfr',n:'Imposta sostitutiva sulla rivalutazione del TFR',c:['dat'],t:'V',q:'16 dicembre (acconto) e 16 febbraio (saldo)',d:[[12,16],[2,16]],chi:'Datori di lavoro',cat:'Imposte'},
+ {id:'d-disabili',n:'Prospetto informativo disabili',c:['dat'],t:'C',q:'31 gennaio',d:[[1,31]],chi:'Datori con almeno 15 dipendenti',cat:'Altro'}
+];
+const CATEGORIE=['Imposte','IVA','Contributi','Tributi locali','Dichiarazioni','Auto','Casa','Altro'];
+const REMOPT=[30,15,7,3,1];
+
+/* ============ stato ============ */
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let CFG=Object.assign({apiKey:'',model:'gemini-flash-latest',models:[],url:'',token:''},LS.get('sf_cfg',{}));
+let D=normalize(LS.get('sf_data',{}));
+let W=LS.get('sf_ws','me'); // 'me' | id cliente | 'all'
+let VIEW=LS.get('sf_view','assistente');
+let pendingFiles=[]; const turnFiles={};
+let dlFilter='aperte', dlMode='elenco', dlDay=null, calRef=new Date(today().getFullYear(),today().getMonth(),1);
+let catView='tutte', catCat='';
+function normalize(d){return Object.assign({updatedAt:0,clients:[],deadlines:[],docs:[],chat:[],applic:{},rem:[7,1]},d||{})}
+const cfgSave=()=>LS.set('sf_cfg',CFG);
+let pushT=null;
+function save(remote=true){D.updatedAt=Date.now();LS.set('sf_data',D);if(remote&&CFG.url){clearTimeout(pushT);pushT=setTimeout(pushRemote,1500)}}
+const ownerName=o=>o==='me'?'Personale':(D.clients.find(c=>c.id===o)||{}).nome||'—';
+const curOwner=()=>W==='all'?'me':W;
+const inWs=x=>W==='all'||x.owner===W;
+
+/* ============ collegamento Google ============ */
+async function api(action,payload){
+  if(!CFG.url)throw new Error('Collegamento Google non configurato');
+  const r=await fetch(CFG.url,{method:'POST',body:JSON.stringify(Object.assign({token:CFG.token,action},payload||{}))});
+  const j=await r.json(); if(!j.ok)throw new Error(j.error||'Errore dal collegamento Google'); return j;
+}
+function setSync(t){$('#sync').textContent=t}
+async function pushRemote(){if(!CFG.url)return;try{setSync('Salvataggio…');await api('save',{data:D});setSync('Sincronizzato')}catch(e){setSync('Non sincronizzato')}}
+async function pullRemote(force){
+  if(!CFG.url){setSync('Solo su questo dispositivo');return}
+  try{setSync('Sincronizzazione…');const j=await api('load');
+    if(j.data&&(force||(j.data.updatedAt||0)>(D.updatedAt||0))){D=normalize(j.data);LS.set('sf_data',D);renderAll()}
+    else if((D.updatedAt||0)>((j.data||{}).updatedAt||0))await api('save',{data:D});
+    setSync('Sincronizzato')}catch(e){setSync('Non sincronizzato')}
+}
+const evTitle=d=>(d.owner==='me'?'':'['+ownerName(d.owner)+'] ')+'Scadenza: '+d.titolo;
+const evDesc=d=>[d.importo!=null&&d.importo!==''?'Importo: '+fmtE(d.importo):'',d.ente?'Ente: '+d.ente:'',d.note||'','— Scadenze Fiscali AI'].filter(Boolean).join('\n');
+async function calCreate(list){
+  if(!CFG.url||!list.length)return;
+  try{const j=await api('createEvents',{events:list.map(d=>({id:d.id,title:evTitle(d),date:d.data,description:evDesc(d),reminders:d.promemoria||[]}))});
+    (j.results||[]).forEach(r=>{const d=D.deadlines.find(x=>x.id===r.id);if(d&&r.eventId)d.calEventId=r.eventId});save()}
+  catch(e){toast('Scadenza salvata, ma Calendar non ha risposto: '+e.message)}
+}
+async function calDelete(d){if(CFG.url&&d.calEventId){const id=d.calEventId;d.calEventId='';try{await api('deleteEvent',{eventId:id})}catch(e){}}}
+function gcalLink(d){const a=d.data.replace(/-/g,''),e=parseD(d.data);e.setDate(e.getDate()+1);
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(evTitle(d))+'&dates='+a+'/'+iso(e).replace(/-/g,'')+'&details='+encodeURIComponent(evDesc(d))}
+
+/* ============ file ============ */
+let idb=null;
+function idbOpen(){return new Promise(res=>{if(!('indexedDB' in window))return res(null);const r=indexedDB.open('sf_files',1);r.onupgradeneeded=()=>r.result.createObjectStore('files',{keyPath:'id'});r.onsuccess=()=>res(r.result);r.onerror=()=>res(null)})}
+async function idbPut(rec){idb=idb||await idbOpen();if(!idb)return;return new Promise(res=>{const t=idb.transaction('files','readwrite');t.objectStore('files').put(rec);t.oncomplete=res;t.onerror=res})}
+async function idbGet(id){idb=idb||await idbOpen();if(!idb)return null;return new Promise(res=>{const r=idb.transaction('files').objectStore('files').get(id);r.onsuccess=()=>res(r.result);r.onerror=()=>res(null)})}
+async function idbDel(id){idb=idb||await idbOpen();if(!idb)return;idb.transaction('files','readwrite').objectStore('files').delete(id)}
+const readAs=(f,how)=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(r.error);r[how](f)});
+const loadScript=src=>new Promise((res,rej)=>{if($(`script[src="${src}"]`))return res();const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=()=>rej(new Error('Impossibile caricare '+src));document.head.appendChild(s)});
+const ext=n=>(n.split('.').pop()||'').toLowerCase();
+async function fileToParts(f){
+  const e=ext(f.name),ty=f.type||'';
+  const inline=async mime=>{const u=await readAs(f,'readAsDataURL');return [{text:'[File allegato: '+f.name+']'},{inlineData:{mimeType:mime,data:u.split(',')[1]}}]};
+  if(ty==='application/pdf'||e==='pdf')return inline('application/pdf');
+  if(ty.startsWith('image/')){return inline(/heic|heif/.test(ty)?ty:(['image/png','image/jpeg','image/webp'].includes(ty)?ty:'image/jpeg'))}
+  if(ty.startsWith('audio/'))return inline(ty);
+  if(e==='docx'){await loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');
+    const r=await window.mammoth.extractRawText({arrayBuffer:await readAs(f,'readAsArrayBuffer')});return [{text:'[File Word: '+f.name+']\n'+r.value.slice(0,60000)}]}
+  if(['xlsx','xls','ods'].includes(e)){await loadScript('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+    const wb=window.XLSX.read(await readAs(f,'readAsArrayBuffer'),{type:'array'});
+    return [{text:'[File Excel: '+f.name+']\n'+wb.SheetNames.map(n=>'# Foglio '+n+'\n'+window.XLSX.utils.sheet_to_csv(wb.Sheets[n])).join('\n').slice(0,60000)}]}
+  if(ty.startsWith('text/')||['txt','csv','xml','eml','json','md','html','htm','rtf'].includes(e)){return [{text:'[File '+f.name+']\n'+(await readAs(f,'readAsText')).slice(0,60000)}]}
+  if(e==='doc')throw new Error(f.name+': il vecchio formato .doc non è leggibile, salvalo come .docx o PDF');
+  throw new Error(f.name+': formato non supportato');
+}
+function addFiles(list){
+  for(const f of list){ if(f.size>15*1024*1024){toast(f.name+' supera 15 MB');continue} pendingFiles.push(f)}
+  renderFiles();
+}
+function renderFiles(){$('#files').innerHTML=pendingFiles.map((f,i)=>`<span class="chip">${esc(f.name)} <button class="x" data-i="${i}" aria-label="Rimuovi ${esc(f.name)}">×</button></span>`).join('')}
+
+/* ============ Gemini ============ */
+const SCHEMA={type:'OBJECT',properties:{
+  risposta:{type:'STRING'},
+  azioni:{type:'ARRAY',items:{type:'OBJECT',properties:{
+    tipo:{type:'STRING',enum:['scadenza','archivia']},
+    titolo:{type:'STRING'},data:{type:'STRING'},importo:{type:'NUMBER',nullable:true},ente:{type:'STRING'},
+    categoria:{type:'STRING',enum:CATEGORIE},note:{type:'STRING'},
+    promemoria_giorni:{type:'ARRAY',items:{type:'INTEGER'}},
+    ricorrenza:{type:'STRING',enum:['nessuna','mensile','trimestrale','annuale']},
+    cliente:{type:'STRING'},riassunto:{type:'STRING'},contenuto_chiave:{type:'STRING'}
+  },required:['tipo','titolo']}}
+},required:['risposta','azioni']};
+function systemPrompt(){
+  const t=today(),g=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'][t.getDay()];
+  const dls=D.deadlines.filter(d=>d.stato!=='pagata').sort((a,b)=>a.data.localeCompare(b.data)).slice(0,80)
+    .map(d=>`- ${d.data} | ${d.titolo} | ${ownerName(d.owner)}${d.importo!=null&&d.importo!==''?' | '+fmtE(d.importo):''}`).join('\n')||'(nessuna)';
+  const docs=D.docs.slice(-40).map(x=>`- ${x.nome} (${ownerName(x.owner)}, ${x.data}): ${x.riassunto||''} ${x.testo?'| '+x.testo.slice(0,800):''}`).join('\n')||'(vuoto)';
+  const cat=CATALOGO.map(c=>`- ${c.n}: ${c.q} (${c.c.map(k=>CATS[k]).join(', ')})`).join('\n');
+  return `Sei l'assistente di un'app italiana per il monitoraggio delle scadenze fiscali, usata sia per uso personale sia da un professionista per i suoi clienti.
+Oggi è ${g} ${iso(t)}. Area di lavoro attiva: ${W==='all'?'Tutte':ownerName(W)}. Clienti registrati: ${D.clients.map(c=>c.nome).join(', ')||'nessuno'}.
+
+Puoi fare tre cose, anche insieme:
+1. PROGRAMMARE: se l'utente fornisce documenti o testo con una scadenza, o chiede di programmarla, aggiungi una azione "scadenza" (una per ogni rata o termine distinto).
+2. ARCHIVIARE: se chiede di archiviare, o se il documento va conservato, aggiungi una azione "archivia" con riassunto e contenuto_chiave (dati importanti: importi, codici, riferimenti, date).
+3. RISPONDERE: se fa una domanda, rispondi nel campo "risposta" usando i dati qui sotto.
+
+Regole:
+- Date sempre nel formato AAAA-MM-GG. Se l'anno non è indicato usa la prossima data futura.
+- Non inventare mai date, importi o enti: se un dato manca lascialo vuoto e dillo in "risposta".
+- promemoria_giorni: giorni di anticipo richiesti dall'utente; se non dice nulla usa ${JSON.stringify(D.rem)}.
+- "cliente": nome del cliente a cui si riferisce, solo se è tra quelli registrati; altrimenti vuoto.
+- "risposta": in italiano, breve e chiara. L'utente confermerà le azioni con un clic: non dire che sono già salvate.
+- Per le domande sulle regole fiscali usa l'elenco sotto e ricorda che proroghe e scadenze comunali vanno verificate.
+
+SCADENZE GIÀ IN AGENDA:
+${dls}
+
+ARCHIVIO DOCUMENTI:
+${docs}
+
+ELENCO REGOLE FISCALI RICORRENTI:
+${cat}`;
+}
+async function listModels(){
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=200',{headers:{'x-goog-api-key':CFG.apiKey}});
+  const j=await r.json(); if(!r.ok)throw new Error((j.error||{}).message||'Chiave non valida');
+  CFG.models=(j.models||[]).filter(m=>(m.supportedGenerationMethods||[]).includes('generateContent')&&/gemini/.test(m.name)&&!/embedding|image|tts|audio|live/.test(m.name)).map(m=>m.name.replace('models/',''));
+  cfgSave();return CFG.models;
+}
+async function gemini(parts,history,retry){
+  if(!CFG.apiKey)throw new Error('Inserisci la chiave API Gemini nelle Impostazioni');
+  const body={systemInstruction:{parts:[{text:systemPrompt()}]},contents:[...history,{role:'user',parts}],
+    generationConfig:{responseMimeType:'application/json',responseSchema:SCHEMA,temperature:0.2}};
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(CFG.model)}:generateContent`,
+    {method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':CFG.apiKey},body:JSON.stringify(body)});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){
+    if(r.status===404&&!retry){const ms=await listModels();const m=ms.find(x=>/flash/.test(x)&&/latest/.test(x))||ms.find(x=>/flash/.test(x))||ms[0];if(m){CFG.model=m;cfgSave();return gemini(parts,history,true)}}
+    if(r.status===429)throw new Error('Limite gratuito di Gemini raggiunto: riprova tra qualche minuto');
+    if(r.status===400||r.status===403)throw new Error('Gemini ha rifiutato la richiesta: '+((j.error||{}).message||'controlla la chiave API'));
+    throw new Error((j.error||{}).message||('Errore Gemini '+r.status));
+  }
+  const txt=(((j.candidates||[])[0]||{}).content||{}).parts?.map(p=>p.text||'').join('')||'';
+  if(!txt)throw new Error('Gemini non ha dato risposta (contenuto bloccato o vuoto)');
+  let out;try{out=JSON.parse(txt)}catch(e){out={risposta:txt,azioni:[]}}
+  out.azioni=Array.isArray(out.azioni)?out.azioni:[];return out;
+}
+async function send(text){
+  text=(text||'').trim(); const files=pendingFiles.slice();
+  if(!text&&!files.length){toast('Scrivi una richiesta o allega un file');return}
+  const btn=$('#send');btn.disabled=true;btn.innerHTML='<span class="spin"></span> L\'assistente sta leggendo…';
+  try{
+    const parts=[];let size=0;
+    for(const f of files){size+=f.size;parts.push(...await fileToParts(f))}
+    if(size>18*1024*1024)throw new Error('I file allegati superano 18 MB in totale: inviali in due volte');
+    parts.push({text:text||'Leggi i documenti allegati: programma le scadenze che contengono, altrimenti archiviali.'});
+    const history=D.chat.slice(-6).map(m=>({role:m.role==='user'?'user':'model',parts:[{text:m.text||'(documenti)'}]}));
+    const out=await gemini(parts,history);
+    const uid1=uid(),aid=uid();
+    D.chat.push({id:uid1,role:'user',text,files:files.map(f=>f.name)});
+    const actions=out.azioni.map(a=>{
+      const cl=a.cliente?D.clients.find(c=>c.nome.toLowerCase()===String(a.cliente).toLowerCase()):null;
+      return {id:uid(),status:'pending',tipo:a.tipo==='archivia'?'archivia':'scadenza',titolo:a.titolo||'',data:validD(a.data)?a.data:'',
+        importo:a.importo??'',ente:a.ente||'',categoria:CATEGORIE.includes(a.categoria)?a.categoria:'Altro',note:a.note||'',
+        promemoria:(a.promemoria_giorni&&a.promemoria_giorni.length?a.promemoria_giorni:D.rem).filter(n=>n>0&&n<=28||n===30).slice(0,5),
+        ricorrenza:a.ricorrenza||'nessuna',owner:cl?cl.id:curOwner(),riassunto:a.riassunto||'',testo:a.contenuto_chiave||''}});
+    D.chat.push({id:aid,role:'ai',text:out.risposta||'',actions});
+    D.chat=D.chat.slice(-40); turnFiles[aid]=files;
+    pendingFiles=[];$('#ask').value='';renderFiles();save();renderThread();
+  }catch(e){toast(e.message)}
+  btn.disabled=false;btn.textContent='Invia all\'assistente';
+}
+
+/* ============ scadenze ============ */
+function addDeadline(o,skipCal){
+  const d=Object.assign({id:uid(),owner:curOwner(),titolo:'',data:'',importo:'',ente:'',categoria:'Altro',note:'',promemoria:D.rem.slice(),ricorrenza:'nessuna',stato:'aperta',calEventId:'',catalogId:'',docId:''},o);
+  D.deadlines.push(d); if(!skipCal){save();calCreate([d])} return d;
+}
+const exists=(owner,catalogId,data)=>D.deadlines.some(d=>d.owner===owner&&d.catalogId===catalogId&&d.data===data);
+function nextOf(d){
+  if(d.catalogId){const c=CATALOGO.find(x=>x.id===d.catalogId);if(!c)return null;const f=parseD(d.data);f.setDate(f.getDate()+1);const n=nextOcc(c,f);return n?iso(n):null}
+  const add={mensile:1,trimestrale:3,annuale:12}[d.ricorrenza];if(!add)return null;
+  const p=parseD(d.data),day=p.getDate(),n=new Date(p.getFullYear(),p.getMonth()+add,1);n.setDate(Math.min(day,new Date(n.getFullYear(),n.getMonth()+1,0).getDate()));return iso(n);
+}
+async function togglePaid(id){
+  const d=D.deadlines.find(x=>x.id===id);if(!d)return;
+  if(d.stato==='pagata'){d.stato='aperta';save();calCreate([d])}
+  else{d.stato='pagata';await calDelete(d);
+    const nx=nextOf(d);
+    if(nx&&!(d.catalogId?exists(d.owner,d.catalogId,nx):D.deadlines.some(x=>x.owner===d.owner&&x.titolo===d.titolo&&x.data===nx))){
+      addDeadline({owner:d.owner,titolo:d.titolo,data:nx,importo:d.catalogId?'':d.importo,ente:d.ente,categoria:d.categoria,note:d.note,promemoria:d.promemoria,ricorrenza:d.ricorrenza,catalogId:d.catalogId});
+      toast('Fatto. Programmata la prossima: '+fmtD(nx))}
+    save()}
+  renderDeadlines();
+}
+async function removeDeadline(id){const d=D.deadlines.find(x=>x.id===id);if(!d||!confirm('Eliminare «'+d.titolo+'»?'))return;await calDelete(d);D.deadlines=D.deadlines.filter(x=>x.id!==id);save();renderDeadlines()}
+function statusOf(d){if(d.stato==='pagata')return 'ok';const n=daysTo(d.data);return n<0?'bad':n<=7?'warn':''}
+function whenTxt(d){if(d.stato==='pagata')return 'Fatto';const n=daysTo(d.data);return n<0?`Scaduta da ${-n} g`:n===0?'Oggi':n===1?'Domani':`Tra ${n} giorni`}
+
+/* form condiviso (scheda AI e finestra di modifica) */
+function ownerOptions(sel){return [['me','Personale'],...D.clients.map(c=>[c.id,c.nome])].map(([v,l])=>`<option value="${esc(v)}"${v===sel?' selected':''}>${esc(l)}</option>`).join('')}
+function dlFields(d){
+  const rem=new Set(d.promemoria||[]);
+  return `<div class="grid">
+    <label class="f" style="grid-column:1/-1"><span>Titolo</span><input type="text" name="titolo" value="${esc(d.titolo)}" required></label>
+    <label class="f"><span>Scadenza</span><input type="date" name="data" value="${esc(d.data)}" required></label>
+    <label class="f"><span>Importo (€)</span><input type="number" step="0.01" name="importo" value="${esc(d.importo)}"></label>
+    <label class="f"><span>Ente</span><input type="text" name="ente" value="${esc(d.ente)}"></label>
+    <label class="f"><span>Categoria</span><select name="categoria">${CATEGORIE.map(c=>`<option${c===d.categoria?' selected':''}>${c}</option>`).join('')}</select></label>
+    <label class="f"><span>Si ripete</span><select name="ricorrenza">${['nessuna','mensile','trimestrale','annuale'].map(c=>`<option${c===d.ricorrenza?' selected':''}>${c}</option>`).join('')}</select></label>
+    <label class="f"><span>Area</span><select name="owner">${ownerOptions(d.owner)}</select></label>
+    <label class="f" style="grid-column:1/-1"><span>Note</span><input type="text" name="note" value="${esc(d.note)}"></label>
+  </div>
+  <div class="f" style="font-size:.8rem;font-weight:600;color:var(--muted)">Promemoria prima della scadenza</div>
+  <div class="rem">${REMOPT.map(n=>`<label><input type="checkbox" name="rem" value="${n}"${rem.has(n)?' checked':''}>${n} ${n===1?'giorno':'giorni'}</label>`).join('')}</div>`;
+}
+function readFields(box){
+  const v=n=>(box.querySelector(`[name=${n}]`)||{}).value||'';
+  return {titolo:v('titolo').trim(),data:v('data'),importo:v('importo')===''?'':Number(v('importo')),ente:v('ente').trim(),categoria:v('categoria'),
+    ricorrenza:v('ricorrenza'),owner:v('owner')||curOwner(),note:v('note').trim(),promemoria:$$('[name=rem]:checked',box).map(x=>Number(x.value))};
+}
+function openDeadlineDialog(d,isNew){
+  const f=$('#dlgform');
+  f.innerHTML=`<h3 style="margin-bottom:14px">${isNew?'Nuova scadenza':'Modifica scadenza'}</h3>${dlFields(d)}
+    <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn ghost" value="no" formnovalidate>Annulla</button><button class="btn" value="ok">Salva</button></div>`;
+  f.onsubmit=async ev=>{
+    if(ev.submitter&&ev.submitter.value==='no')return;
+    const v=readFields(f);
+    if(isNew){addDeadline(Object.assign({},d,v,{id:uid()}))}
+    else{const cur=D.deadlines.find(x=>x.id===d.id);const changed=cur.data!==v.data||cur.titolo!==v.titolo||String(cur.promemoria)!==String(v.promemoria)||cur.owner!==v.owner;
+      Object.assign(cur,v);save();if(changed&&cur.stato!=='pagata'){await calDelete(cur);calCreate([cur])}}
+    renderDeadlines();toast('Scadenza salvata');
+  };
+  const dlg=$('#dlg');dlg.showModal?dlg.showModal():dlg.setAttribute('open','');
+}
+
+/* ============ rendering ============ */
+function renderWs(){
+  const s=$('#ws');if(W!=='me'&&W!=='all'&&!D.clients.some(c=>c.id===W))W='me';
+  s.innerHTML=`<option value="me">Personale</option>${D.clients.length?'<optgroup label="Clienti">'+D.clients.map(c=>`<option value="${esc(c.id)}">${esc(c.nome)}</option>`).join('')+'</optgroup><option value="all">Tutte le aree</option>':''}`;
+  s.value=W;
+}
+function setView(v){VIEW=v;LS.set('sf_view',v);$$('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));$$('section.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));renderAll()}
+function renderAll(){renderWs();({assistente:renderThread,scadenzario:renderDeadlines,elenco:renderCatalog,archivio:renderDocs,clienti:renderClients,impostazioni:renderSettings}[VIEW]||(()=>{}))()}
+
+function actionCard(m,a){
+  if(a.status!=='pending')return `<div class="act ${a.status==='done'?'done':'no'}"><h4>${a.tipo==='scadenza'?'Scadenza':'Archivio'} · ${a.status==='done'?'salvata':'scartata'}</h4>${esc(a.titolo)}${a.data?' — '+fmtD(a.data):''}</div>`;
+  if(a.tipo==='scadenza')return `<div class="act" data-m="${m.id}" data-a="${a.id}"><h4>Scadenza da programmare</h4>${dlFields(a)}
+    ${!a.data?'<p class="small" style="color:var(--bad)">Data non trovata: inseriscila prima di confermare.</p>':''}
+    <div class="row" style="margin-top:12px"><button class="btn" data-do="ok">Conferma e attiva promemoria</button><button class="btn ghost" data-do="no">Scarta</button></div></div>`;
+  return `<div class="act" data-m="${m.id}" data-a="${a.id}"><h4>Documento da archiviare</h4>
+    <div class="grid"><label class="f"><span>Nome</span><input type="text" name="titolo" value="${esc(a.titolo)}"></label>
+    <label class="f"><span>Area</span><select name="owner">${ownerOptions(a.owner)}</select></label>
+    <label class="f" style="grid-column:1/-1"><span>Riassunto</span><textarea name="riassunto">${esc(a.riassunto)}</textarea></label></div>
+    <div class="row"><button class="btn" data-do="ok">Archivia</button><button class="btn ghost" data-do="no">Scarta</button></div></div>`;
+}
+function renderThread(){
+  const t=$('#thread');
+  if(!D.chat.length){t.innerHTML='';return}
+  t.innerHTML=D.chat.slice().reverse().map(m=>m.role==='user'
+    ?`<div class="msg user">${m.files&&m.files.length?`<p class="small muted">${m.files.map(esc).join(', ')}</p>`:''}<p>${esc(m.text||'(documenti allegati)')}</p></div>`
+    :`<div class="msg ai"><p>${esc(m.text)}</p>${(m.actions||[]).map(a=>actionCard(m,a)).join('')}</div>`).join('')
+    +`<div class="row"><button class="btn sm ghost" id="clearchat">Svuota la conversazione</button></div>`;
+}
+async function storeFiles(mid,owner,nome,riassunto,testo){
+  const files=turnFiles[mid]||[];const doc={id:uid(),owner,nome,riassunto,testo,data:iso(today()),files:[]};
+  for(const f of files){const fid=uid();await idbPut({id:fid,name:f.name,type:f.type,blob:f});const rec={id:fid,name:f.name,url:''};doc.files.push(rec);
+    if(CFG.url&&f.size<8*1024*1024){readAs(f,'readAsDataURL').then(u=>api('upload',{name:f.name,mime:f.type||'application/octet-stream',b64:u.split(',')[1]})).then(j=>{rec.url=j.url;save()}).catch(()=>{})}}
+  D.docs.push(doc);return doc;
+}
+async function confirmAction(box,ok){
+  const m=D.chat.find(x=>x.id===box.dataset.m),a=m&&m.actions.find(x=>x.id===box.dataset.a);if(!a)return;
+  if(!ok){a.status='discarded';save();renderThread();return}
+  if(a.tipo==='scadenza'){
+    const v=readFields(box);if(!v.titolo||!validD(v.data)){toast('Servono titolo e data');return}
+    Object.assign(a,v);let docId='';
+    if((turnFiles[m.id]||[]).length&&!m.filed){const doc=await storeFiles(m.id,v.owner,v.titolo,a.riassunto||'Documento collegato alla scadenza',a.testo);docId=doc.id;m.filed=doc.id}else docId=m.filed||'';
+    addDeadline(Object.assign({},v,{docId}));a.status='done';
+    toast(CFG.url?'Scadenza salvata: promemoria su Calendar ed email attivi':'Scadenza salvata');
+  }else{
+    a.titolo=(box.querySelector('[name=titolo]').value||'Documento').trim();a.owner=box.querySelector('[name=owner]').value;a.riassunto=box.querySelector('[name=riassunto]').value;
+    if(!m.filed){const doc=await storeFiles(m.id,a.owner,a.titolo,a.riassunto,a.testo);m.filed=doc.id}
+    a.status='done';toast('Documento archiviato');
+  }
+  save();renderThread();
+}
+
+function renderDeadlines(){
+  const all=D.deadlines.filter(inWs),open=all.filter(d=>d.stato!=='pagata');
+  const late=open.filter(d=>daysTo(d.data)<0),w7=open.filter(d=>{const n=daysTo(d.data);return n>=0&&n<=7}),w30=open.filter(d=>{const n=daysTo(d.data);return n>=0&&n<=30});
+  const tot=w30.concat(late).reduce((s,d)=>s+(Number(d.importo)||0),0);
+  $('#stats').innerHTML=`<div class="stat bad"><b>${late.length}</b><span>Scadute</span></div><div class="stat warn"><b>${w7.length}</b><span>Entro 7 giorni</span></div>
+    <div class="stat"><b>${w30.length}</b><span>Entro 30 giorni</span></div><div class="stat"><b>${fmtE(tot)||'—'}</b><span>Da pagare (30 gg + scadute)</span></div>`;
+  $('#dlfilters').innerHTML=[['aperte','Da fare'],['scadute','Scadute'],['pagate','Fatte'],['tutte','Tutte']].map(([k,l])=>`<button class="chip" data-f="${k}" aria-pressed="${dlFilter===k}">${l}</button>`).join('')
+    +`<span style="flex:1"></span><button class="chip" data-mode="elenco" aria-pressed="${dlMode==='elenco'}">Elenco</button><button class="chip" data-mode="mese" aria-pressed="${dlMode==='mese'}">Mese</button>`;
+  let list=all.filter(d=>dlFilter==='tutte'||(dlFilter==='aperte'&&d.stato!=='pagata')||(dlFilter==='pagate'&&d.stato==='pagata')||(dlFilter==='scadute'&&d.stato!=='pagata'&&daysTo(d.data)<0));
+  let html='';
+  if(dlMode==='mese'){
+    const y=calRef.getFullYear(),mo=calRef.getMonth(),first=new Date(y,mo,1),start=new Date(first);start.setDate(1-((first.getDay()+6)%7));
+    html+=`<div class="row" style="margin-top:14px"><button class="btn sm ghost" data-cal="-1" aria-label="Mese precedente">‹</button><h3 style="min-width:170px;text-align:center;text-transform:capitalize">${MESI[mo]} ${y}</h3><button class="btn sm ghost" data-cal="1" aria-label="Mese successivo">›</button>${dlDay?`<button class="chip" data-day="">Mostra tutto il mese ×</button>`:''}</div><div class="cal">`
+      +['L','M','M','G','V','S','D'].map(x=>`<div class="h">${x}</div>`).join('');
+    for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const k=iso(d),it=all.filter(x=>x.data===k&&x.stato!=='pagata');
+      const st=it.some(x=>statusOf(x)==='bad')?'bad':it.some(x=>statusOf(x)==='warn')?'warn':'';
+      html+=`<div class="${d.getMonth()!==mo?'o':''} ${k===iso(today())?'td':''}">${d.getDate()}${it.length?`<span class="n ${st}" data-day="${k}" role="button" tabindex="0">${it.length} scad.</span>`:''}</div>`}
+    html+='</div>';
+    list=all.filter(d=>dlDay?d.data===dlDay:(parseD(d.data).getFullYear()===y&&parseD(d.data).getMonth()===mo));
+  }
+  list.sort((a,b)=>a.data.localeCompare(b.data));
+  if(!list.length)html+=`<div class="card" style="margin-top:14px"><b>Nessuna scadenza qui.</b><p class="muted" style="margin:6px 0 0">Aggiungile dall'Assistente, dall'Elenco scadenze fiscali oppure con «Nuova scadenza».</p></div>`;
+  let cur='';
+  for(const d of list){
+    const p=parseD(d.data),mk=MESI[p.getMonth()]+' '+p.getFullYear();if(mk!==cur){cur=mk;html+=`<div class="month">${mk}</div>`}
+    const st=statusOf(d);
+    html+=`<div class="dl ${st}" data-id="${d.id}"><div class="stub"><b>${p.getDate()}</b><i>${MESI3[p.getMonth()]}</i></div><div class="body">
+      <div class="t">${esc(d.titolo)}</div>
+      <div class="meta"><span class="tag ${st}">${whenTxt(d)}</span>${d.importo!==''&&d.importo!=null?`<b>${fmtE(d.importo)}</b>`:''}<span>${esc(d.categoria)}</span>${d.ente?`<span>${esc(d.ente)}</span>`:''}
+        ${W==='all'?`<span class="tag">${esc(ownerName(d.owner))}</span>`:''}${d.ricorrenza&&d.ricorrenza!=='nessuna'||d.catalogId?'<span>↻ ricorrente</span>':''}
+        ${d.promemoria&&d.promemoria.length&&d.stato!=='pagata'?`<span>Avvisi: ${d.promemoria.slice().sort((a,b)=>b-a).join(', ')} gg prima${d.calEventId?' · su Calendar':''}</span>`:''}</div>
+      ${d.note?`<div class="small muted">${esc(d.note)}</div>`:''}
+      <div class="acts"><button class="btn sm ${d.stato==='pagata'?'ghost':''}" data-do="paid">${d.stato==='pagata'?'Riapri':'Segna come fatto'}</button>
+        <button class="btn sm ghost" data-do="edit">Modifica</button>
+        ${!d.calEventId&&d.stato!=='pagata'?`<a class="btn sm ghost" style="text-decoration:none" target="_blank" rel="noopener" href="${esc(gcalLink(d))}">Aggiungi a Google Calendar</a>`:''}
+        <button class="btn sm danger" data-do="del">Elimina</button></div></div></div>`;
+  }
+  $('#dlview').innerHTML=html;
+}
+
+function applic(){const o=curOwner();return D.applic[o]||(D.applic[o]=[])}
+function renderCatalog(){
+  const mine=W==='me'||W==='all'?'Le mie':'Di '+ownerName(W);
+  $('#catfilters').innerHTML=`<button class="chip" data-cv="mie" aria-pressed="${catView==='mie'}">★ ${esc(mine)}</button><button class="chip" data-cv="tutte" aria-pressed="${catView==='tutte'}">Tutte</button><span style="width:10px"></span>`
+    +[['','Ogni categoria'],...Object.entries(CATS)].map(([k,l])=>`<button class="chip" data-cc="${k}" aria-pressed="${catCat===k}">${l}</button>`).join('');
+  const q=($('#catq').value||'').toLowerCase(),ap=applic();
+  let rows='<thead><tr><th></th><th>Scadenza</th><th>Quando</th><th>Prossima</th><th>Chi riguarda</th><th></th></tr></thead><tbody>',n=0;
+  for(const [k,l] of Object.entries(CATS)){
+    if(catCat&&catCat!==k)continue;
+    const items=CATALOGO.filter(c=>(catCat?c.c.includes(k):c.c[0]===k)&&(catView==='tutte'||ap.includes(c.id))&&(!q||(c.n+' '+c.q+' '+c.chi).toLowerCase().includes(q)));
+    if(!items.length)continue;
+    rows+=`<tr class="grp"><td colspan="6">${l}</td></tr>`;
+    for(const c of items){n++;const nx=nextOcc(c),dd=nx?daysTo(iso(nx)):null;
+      rows+=`<tr data-id="${c.id}"><td><button class="star" aria-pressed="${ap.includes(c.id)}" aria-label="Riguarda quest'area" title="Riguarda quest'area">★</button></td>
+        <td data-l="Scadenza"><span class="n">${esc(c.n)}</span><br><span class="tag">${TIPI[c.t]}</span>${c.c.length>1?` <span class="small muted">anche: ${c.c.slice(1).map(x=>CATS[x]).join(', ')}</span>`:''}${c.note?`<div class="small muted">${esc(c.note)}</div>`:''}</td>
+        <td data-l="Quando">${esc(c.q)}</td>
+        <td data-l="Prossima" class="next">${nx?`${nx.getDate()} ${MESI3[nx.getMonth()]} ${nx.getFullYear()}<br><span class="tag ${dd<=7?'warn':''}">${dd===0?'oggi':'tra '+dd+' g'}</span>`:'<span class="muted">variabile</span>'}</td>
+        <td data-l="Chi riguarda" class="small">${esc(c.chi)}</td>
+        <td><button class="btn sm ghost" data-do="add">+ Scadenzario</button></td></tr>`}
+  }
+  if(!n)rows+=`<tr><td colspan="6" class="muted" style="padding:18px">${catView==='mie'?'Nessuna voce con la stella in quest\'area. Passa a «Tutte» e tocca ★ sulle scadenze che ti riguardano.':'Nessun risultato.'}</td></tr>`;
+  $('#cattable').innerHTML=rows+'</tbody>';
+}
+function addFromCatalog(c){
+  const nx=nextOcc(c),o=curOwner();
+  if(!nx){openDeadlineDialog({owner:o,titolo:c.n,data:'',importo:'',ente:'',categoria:c.cat,note:c.q,promemoria:D.rem.slice(),ricorrenza:'annuale'},true);return}
+  if(exists(o,c.id,iso(nx))){toast('Già nello scadenzario');return}
+  addDeadline({owner:o,titolo:c.n,data:iso(nx),categoria:c.cat,note:c.note||'',catalogId:c.id});toast('Aggiunta: '+fmtD(iso(nx))+' ('+ownerName(o)+')');
+}
+function bulkCatalog(){
+  const o=curOwner(),ap=applic(),from=today(),to=new Date(from);to.setFullYear(to.getFullYear()+1);const made=[];
+  for(const c of CATALOGO.filter(x=>ap.includes(x.id)))for(const dt of occurrences(c,from,to))if(!exists(o,c.id,iso(dt)))made.push(addDeadline({owner:o,titolo:c.n,data:iso(dt),categoria:c.cat,note:c.note||'',catalogId:c.id},true));
+  if(!made.length){toast(ap.length?'Sono già tutte nello scadenzario':'Metti prima la stella sulle voci che ti riguardano');return}
+  save();calCreate(made);toast(made.length+' scadenze aggiunte per '+ownerName(o));
+}
+
+function renderDocs(){
+  const list=D.docs.filter(inWs).slice().reverse();
+  $('#docs').innerHTML=list.length?list.map(x=>`<div class="card" style="margin-bottom:10px" data-id="${x.id}"><div class="row" style="justify-content:space-between"><h3>${esc(x.nome)}</h3><span class="small muted">${fmtD(x.data)}${W==='all'?' · '+esc(ownerName(x.owner)):''}</span></div>
+    <p style="margin:8px 0;white-space:pre-wrap">${esc(x.riassunto)}</p>${x.testo?`<details class="small muted"><summary>Dati chiave</summary><p style="white-space:pre-wrap">${esc(x.testo)}</p></details>`:''}
+    <div class="row" style="margin-top:8px">${(x.files||[]).map(f=>`<button class="chip" data-file="${f.id}">⬇ ${esc(f.name)}</button>${f.url?`<a class="small" target="_blank" rel="noopener" href="${esc(f.url)}">su Drive</a>`:''}`).join('')}
+    <span style="flex:1"></span><button class="btn sm danger" data-do="del">Elimina</button></div></div>`).join('')
+    :`<div class="card"><b>Archivio vuoto.</b><p class="muted" style="margin:6px 0 0">Carica un documento nell'Assistente e chiedi di archiviarlo.</p></div>`;
+}
+function renderClients(){
+  $('#cl-list').innerHTML=D.clients.map(c=>{const n=D.deadlines.filter(d=>d.owner===c.id&&d.stato!=='pagata').length;
+    return `<div class="card" style="margin-bottom:8px" data-id="${c.id}"><div class="row" style="justify-content:space-between"><div><b>${esc(c.nome)}</b> <span class="tag">${CATS[c.tipo]||''}</span><div class="small muted">${n} scadenze aperte${c.note?' · '+esc(c.note):''}</div></div>
+    <div class="row"><button class="btn sm" data-do="open">Apri</button><button class="btn sm danger" data-do="del">Elimina</button></div></div></div>`}).join('')||'<p class="muted">Nessun cliente. Aggiungi il primo qui sopra.</p>';
+}
+function renderSettings(){
+  $('#s-key').value=CFG.apiKey;$('#s-url').value=CFG.url;$('#s-token').value=CFG.token;
+  const ms=[...new Set([CFG.model,'gemini-flash-latest',...CFG.models])];
+  $('#s-model').innerHTML=ms.map(m=>`<option${m===CFG.model?' selected':''}>${esc(m)}</option>`).join('');
+  $('#s-rem').innerHTML=REMOPT.map(n=>`<label><input type="checkbox" value="${n}"${D.rem.includes(n)?' checked':''}>${n} ${n===1?'giorno':'giorni'} prima</label>`).join('');
+}
+
+/* ============ esporta ============ */
+function download(name,content,type){const a=document.createElement('a');a.href=URL.createObjectURL(content instanceof Blob?content:new Blob([content],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+function buildICS(list){
+  const e=s=>String(s||'').replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/([,;])/g,'\\$1');
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Scadenze Fiscali AI//IT','CALSCALE:GREGORIAN'];
+  for(const d of list){const end=parseD(d.data);end.setDate(end.getDate()+1);
+    L.push('BEGIN:VEVENT','UID:'+d.id+'@scadenze-fiscali-ai','DTSTAMP:'+new Date().toISOString().replace(/[-:]|\.\d+/g,''),'DTSTART;VALUE=DATE:'+d.data.replace(/-/g,''),'DTEND;VALUE=DATE:'+iso(end).replace(/-/g,''),'SUMMARY:'+e(evTitle(d)),'DESCRIPTION:'+e(evDesc(d)));
+    for(const n of d.promemoria||[])L.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+e(d.titolo),'TRIGGER:-PT'+(n*24-9)+'H','END:VALARM');
+    L.push('END:VEVENT')}
+  L.push('END:VCALENDAR');return L.join('\r\n');
+}
+
+/* ============ eventi ============ */
+function init(){
+  $$('nav.tabs button').forEach(b=>b.onclick=()=>setView(b.dataset.v));
+  $('#ws').onchange=e=>{W=e.target.value;LS.set('sf_ws',W);dlDay=null;renderAll()};
+  const drop=$('#drop'),pick=$('#pick');
+  drop.onclick=()=>pick.click();drop.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick.click()}};
+  pick.onchange=()=>{addFiles(pick.files);pick.value=''};
+  ['dragenter','dragover'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.add('over')}));
+  ['dragleave','drop'].forEach(n=>drop.addEventListener(n,e=>{e.preventDefault();drop.classList.remove('over')}));
+  drop.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
+  document.addEventListener('paste',e=>{if(VIEW==='assistente'&&e.clipboardData&&e.clipboardData.files.length)addFiles(e.clipboardData.files)});
+  $('#files').onclick=e=>{const b=e.target.closest('.x');if(b){pendingFiles.splice(+b.dataset.i,1);renderFiles()}};
+  $('#send').onclick=()=>send($('#ask').value);
+  $$('#v-assistente [data-q]').forEach(b=>b.onclick=()=>send(b.dataset.q));
+  $('#thread').onclick=e=>{const b=e.target.closest('[data-do]');if(b)confirmAction(b.closest('.act'),b.dataset.do==='ok');
+    if(e.target.id==='clearchat'&&confirm('Svuotare la conversazione? Scadenze e archivio restano.')){D.chat=[];save();renderThread()}};
+  $('#newdl').onclick=()=>openDeadlineDialog({owner:curOwner(),titolo:'',data:'',importo:'',ente:'',categoria:'Altro',note:'',promemoria:D.rem.slice(),ricorrenza:'nessuna'},true);
+  $('#ics').onclick=()=>{const l=D.deadlines.filter(d=>inWs(d)&&d.stato!=='pagata');if(!l.length)return toast('Nessuna scadenza da esportare');download('scadenze.ics',buildICS(l),'text/calendar')};
+  $('#dlfilters').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.f)dlFilter=b.dataset.f;if(b.dataset.mode){dlMode=b.dataset.mode;dlDay=null}renderDeadlines()};
+  $('#dlview').onclick=e=>{
+    const c=e.target.closest('[data-cal]');if(c){calRef=new Date(calRef.getFullYear(),calRef.getMonth()+Number(c.dataset.cal),1);dlDay=null;return renderDeadlines()}
+    const dy=e.target.closest('[data-day]');if(dy){dlDay=dy.dataset.day||null;return renderDeadlines()}
+    const b=e.target.closest('[data-do]');if(!b)return;const id=b.closest('.dl').dataset.id;
+    if(b.dataset.do==='paid')togglePaid(id);if(b.dataset.do==='del')removeDeadline(id);if(b.dataset.do==='edit')openDeadlineDialog(D.deadlines.find(x=>x.id===id),false)};
+  $('#catfilters').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.cv)catView=b.dataset.cv;if(b.dataset.cc!==undefined)catCat=b.dataset.cc;renderCatalog()};
+  $('#catq').oninput=renderCatalog;$('#catbulk').onclick=bulkCatalog;
+  $('#cattable').onclick=e=>{const tr=e.target.closest('tr[data-id]');if(!tr)return;const c=CATALOGO.find(x=>x.id===tr.dataset.id);
+    if(e.target.closest('.star')){const ap=applic(),i=ap.indexOf(c.id);i<0?ap.push(c.id):ap.splice(i,1);save();renderCatalog()}
+    if(e.target.closest('[data-do=add]'))addFromCatalog(c)};
+  $('#docs').onclick=async e=>{const f=e.target.closest('[data-file]');if(f){const r=await idbGet(f.dataset.file);return r?download(r.name,r.blob):toast('File originale non presente su questo dispositivo')}
+    const b=e.target.closest('[data-do=del]');if(b){const id=b.closest('.card').dataset.id,x=D.docs.find(d=>d.id===id);if(confirm('Eliminare «'+x.nome+'» dall\'archivio?')){(x.files||[]).forEach(f=>idbDel(f.id));D.docs=D.docs.filter(d=>d.id!==id);save();renderDocs()}}};
+  $('#cl-add').onclick=()=>{const n=$('#cl-nome').value.trim();if(!n)return toast('Scrivi il nome del cliente');
+    const c={id:uid(),nome:n,tipo:$('#cl-tipo').value,note:$('#cl-note').value.trim()};D.clients.push(c);
+    D.applic[c.id]=CATALOGO.filter(x=>x.c.includes(c.tipo)&&x.d||x.c.includes(c.tipo)&&x.mon!=null).map(x=>x.id);
+    $('#cl-nome').value=$('#cl-note').value='';save();renderAll();toast('Cliente aggiunto con le scadenze tipiche già segnate con la stella')};
+  $('#cl-list').onclick=e=>{const b=e.target.closest('[data-do]');if(!b)return;const id=b.closest('.card').dataset.id;
+    if(b.dataset.do==='open'){W=id;LS.set('sf_ws',W);setView('scadenzario')}
+    if(b.dataset.do==='del'&&confirm('Eliminare il cliente con tutte le sue scadenze e i suoi documenti?')){D.deadlines.filter(d=>d.owner===id).forEach(calDelete);
+      D.deadlines=D.deadlines.filter(d=>d.owner!==id);D.docs=D.docs.filter(d=>d.owner!==id);D.clients=D.clients.filter(c=>c.id!==id);delete D.applic[id];save();renderAll()}};
+  $('#s-save').onclick=()=>{CFG.apiKey=$('#s-key').value.trim();CFG.model=$('#s-model').value;cfgSave();toast('Impostazioni salvate')};
+  $('#s-models').onclick=async()=>{CFG.apiKey=$('#s-key').value.trim();cfgSave();try{const m=await listModels();renderSettings();toast(m.length+' modelli disponibili')}catch(e){toast(e.message)}};
+  $('#s-test').onclick=async()=>{CFG.apiKey=$('#s-key').value.trim();CFG.model=$('#s-model').value;cfgSave();try{const o=await gemini([{text:'Rispondi solo: "Assistente pronto".'}],[]);toast(o.risposta||'Assistente pronto')}catch(e){toast(e.message)}};
+  $('#s-gsave').onclick=async()=>{CFG.url=$('#s-url').value.trim();CFG.token=$('#s-token').value;cfgSave();if(!CFG.url){setSync('Solo su questo dispositivo');return toast('Collegamento rimosso')}
+    try{const j=await api('ping');toast('Collegato a Google'+(j.email?' ('+j.email+')':''));await pullRemote()}catch(e){toast('Collegamento non riuscito: '+e.message)}};
+  $('#s-pull').onclick=()=>pullRemote(true).then(()=>toast('Dati aggiornati da Google'));
+  $('#s-rem').onchange=()=>{D.rem=$$('#s-rem input:checked').map(x=>+x.value);save()};
+  $('#s-exp').onclick=()=>download('scadenze-fiscali-dati.json',JSON.stringify(D,null,2),'application/json');
+  $('#s-imp').onclick=()=>$('#s-impf').click();
+  $('#s-impf').onchange=async e=>{try{D=normalize(JSON.parse(await readAs(e.target.files[0],'readAsText')));save();renderAll();toast('Dati importati')}catch(x){toast('File non valido')}};
+  const h=location.hash.slice(1);if($('#v-'+h))VIEW=h;
+  setView(VIEW);pullRemote();
+}
+if(typeof document!=='undefined')document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
