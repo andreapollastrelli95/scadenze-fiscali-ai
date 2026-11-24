@@ -2,8 +2,6 @@
 
 Scadenzario fiscale con assistente Gemini, per uso personale.
 
-**Apri l'app:** https://andreapollastrelli95.github.io/scadenze-fiscali-ai/
-
 ## Cosa fa
 
 - **Assistente** – carichi PDF, foto, Word, Excel, email, audio o scrivi testo libero; Gemini propone di archiviare, rispondere o programmare la scadenza con promemoria. Nulla viene salvato senza conferma.
