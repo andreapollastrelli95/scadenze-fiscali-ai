@@ -2,8 +2,6 @@
 
 Scadenzario fiscale con assistente Gemini, per uso personale.
 
-**[Apri la demo](https://andreapollastrelli95.github.io/scadenze-fiscali-ai/)**
-
 ## Schermate dell'app
 
 Le immagini seguenti mostrano schermate reali dell'app.
