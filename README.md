@@ -2,6 +2,16 @@
 
 Scadenzario fiscale con assistente Gemini, per uso personale.
 
+**[Apri la demo](https://andreapollastrelli95.github.io/scadenze-fiscali-ai/)**
+
+## Schermate dell'app
+
+Le immagini seguenti mostrano schermate reali dell'app.
+
+| Assistente | Scadenzario | Elenco scadenze fiscali |
+|:---:|:---:|:---:|
+| <img src="assets/screenshots/assistente.png" alt="Assistente: caricamento documenti e richiesta a Gemini" width="100%"> | <img src="assets/screenshots/scadenzario.png" alt="Scadenzario: riepilogo e filtri delle scadenze" width="100%"> | <img src="assets/screenshots/elenco-scadenze.png" alt="Elenco delle principali scadenze fiscali" width="100%"> |
+
 ## Cosa fa
 
 - **Assistente** – carichi PDF, foto, Word, Excel, email, audio o scrivi testo libero; Gemini propone di archiviare, rispondere o programmare la scadenza con promemoria. Nulla viene salvato senza conferma.
